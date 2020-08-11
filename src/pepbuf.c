@@ -12,6 +12,7 @@
 #include <string.h>
 #include <assert.h>
 #include <sys/mman.h>
+#include <unistd.h>
 
 #include "pepdefs.h"
 #include "pepsal.h"
@@ -20,8 +21,10 @@
 int pepbuf_init(struct pep_buffer *pbuf)
 {
     void *space;
+    long page_size;
 
-    space = mmap(NULL, PEPBUF_PAGES * PAGE_SIZE, PROT_READ | PROT_WRITE,
+    page_size = sysconf(_SC_PAGESIZE);
+    space = mmap(NULL, PEPBUF_PAGES * page_size, PROT_READ | PROT_WRITE,
                  MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
     if (!space) {
         return -1;
@@ -29,7 +32,7 @@ int pepbuf_init(struct pep_buffer *pbuf)
 
     pbuf->space = space;
     pbuf->r_pos = pbuf->w_pos = pbuf->space;
-    pbuf->total_size = PEPBUF_PAGES * PAGE_SIZE;
+    pbuf->total_size = PEPBUF_PAGES * page_size;
     pbuf->space_left = pbuf->total_size;
     pbuf->rbytes = 0;
 

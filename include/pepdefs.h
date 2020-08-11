@@ -13,9 +13,6 @@
 /* Default port number of pepsal listener */
 #define PEP_DEFAULT_PORT 5000
 
-/* Default receive buffer size of queuer thread */
-#define QUEUER_BUF_SIZE PAGE_SIZE
-
 /*
  * Size of buffer that is used for temporary error messages
  * composed by pep_error and pep_warning functions.
