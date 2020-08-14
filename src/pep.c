@@ -120,7 +120,7 @@ static pthread_t *workers = NULL;
 #define pep_error(fmt, args...)                       \
     syslog(LOG_ERR, "%s():%d: " fmt " (errno %d)",    \
            __FUNCTION__, __LINE__, ##args, errno);    \
-    __pep_error(__FUNCTION__, __LINE__, fmt, ##args)  
+    __pep_error(__FUNCTION__, __LINE__, fmt, ##args)
 
 #define pep_warning(fmt, args...)                     \
     syslog(LOG_WARNING, "%s():%d: " fmt,              \
@@ -578,8 +578,7 @@ err:
 void *listener_loop(void UNUSED(*unused))
 {
     int                 listenfd, optval, ret, connfd, out_fd;
-    struct sockaddr_in  cliaddr, servaddr,
-                        r_servaddr, proxy_servaddr;
+    struct sockaddr_in  cliaddr, servaddr, r_servaddr;
     socklen_t           len;
     struct pep_proxy   *proxy;
     struct hostent     *host;
@@ -605,7 +604,7 @@ void *listener_loop(void UNUSED(*unused))
     if (ret < 0) {
         pep_error("Failed to set SOL_REUSEADDR option! [RET = %d]", ret);
     }
- 
+
     /* Set socket transparent (able to bind to external address) */
     ret = setsockopt(listenfd, SOL_IP, IP_TRANSPARENT,
                      &optval, sizeof(optval));
@@ -729,20 +728,6 @@ void *listener_loop(void UNUSED(*unused))
 
         toip(ipbuf, proxy->src.addr);
         toip(ipbuf1, proxy->dst.addr);
-        memset(&proxy_servaddr, 0, sizeof(proxy_servaddr));
-        proxy_servaddr.sin_family = AF_INET;
-        proxy_servaddr.sin_addr.s_addr = inet_addr(ipbuf);
-        proxy_servaddr.sin_port = htons(proxy->src.port);
-        PEP_DEBUG("# Binding socket [%s:%d] --> [%s:%d]",
-                  ipbuf, proxy->src.port, ipbuf1, proxy->dst.port); 
-
-        ret = bind(out_fd, (struct sockaddr *)&proxy_servaddr,
-                   sizeof(proxy_servaddr));
-        if (ret < 0) {
-            pep_warning("Failed to bind proxy socket! [%s:%d]",
-                        strerror(errno), errno);
-            goto close_connection;
-        }
 
         if (fastopen) {
           ret = sendto(out_fd, PEPBUF_WPOS(&proxy->src.buf), 0, MSG_FASTOPEN,
@@ -1056,8 +1041,8 @@ static void *timer_sch_loop(void __attribute__((unused)) *unused)
         gettimeofday(&last_log_evt_time, 0);
         gettimeofday(&last_gc_evt_time, 0);
     }
-    
-    for(;;) { 
+
+    for(;;) {
         gettimeofday(&now, 0);
         if (logger.file && now.tv_sec > last_log_evt_time.tv_sec + PEPLOGGER_INTERVAL) {
             logger_fn();
