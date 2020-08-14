@@ -70,7 +70,6 @@ static int gcc_interval = PEP_GCC_INTERVAL;
 static int pending_conn_lifetime = PEP_PENDING_CONN_LIFETIME;
 static int portnum = PEP_DEFAULT_PORT;
 static int max_conns = (PEP_MIN_CONNS + PEP_MAX_CONNS) / 2;
-static char pepsal_ip_addr[20] = "0.0.0.0";
 
 /*
  * The main aim of this structure is to reduce search time
@@ -1149,9 +1148,6 @@ int main(int argc, char *argv[])
                 break;
             case 'p':
                 portnum = atoi(optarg);
-                break;
-            case 'a':
-                strncpy(pepsal_ip_addr, optarg, 19);
                 break;
             case 'l':
                 logger.filename = optarg;
