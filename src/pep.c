@@ -717,7 +717,7 @@ void *listener_loop(void UNUSED(*unused))
         fcntl(out_fd, F_SETFL, O_NONBLOCK);
 
 	if (mark >= 0) {
-		ret = setsockopt(sock->fd, SOL_SOCKET, SO_MARK,
+		ret = setsockopt(out_fd, SOL_SOCKET, SO_MARK,
 				 &mark, sizeof(mark));
 		if (ret < 0) {
 		    pep_error("Failed to set mark to %d [RET = %d]", mark, ret);
