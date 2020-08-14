@@ -69,6 +69,7 @@ static int fastopen = 0;
 static int gcc_interval = PEP_GCC_INTERVAL;
 static int pending_conn_lifetime = PEP_PENDING_CONN_LIFETIME;
 static int portnum = PEP_DEFAULT_PORT;
+static int mark = 0;
 static int max_conns = (PEP_MIN_CONNS + PEP_MAX_CONNS) / 2;
 
 /*
@@ -715,9 +716,16 @@ void *listener_loop(void UNUSED(*unused))
         out_fd = ret;
         fcntl(out_fd, F_SETFL, O_NONBLOCK);
 
+	if (mark >= 0) {
+		ret = setsockopt(sock->fd, SOL_SOCKET, SO_MARK,
+				 &mark, sizeof(mark));
+		if (ret < 0) {
+		    pep_error("Failed to set mark to %d [RET = %d]", mark, ret);
+		}
+	}
+
         /*
          * Set outbound endpoint to transparent mode
-         * (bind to external address)
          */
         ret = setsockopt(out_fd, SOL_IP, IP_TRANSPARENT,
                          &optval, sizeof(optval));
@@ -1128,7 +1136,7 @@ int main(int argc, char *argv[])
             {0, 0, 0, 0}
         };
 
-        c = getopt_long(argc, argv, "dvVhfp:a:l:g:t:c:",
+        c = getopt_long(argc, argv, "dvVhfp:a:l:g:t:c:m:",
                         long_options, &option_index);
         if (c == -1)
             break;
@@ -1148,6 +1156,9 @@ int main(int argc, char *argv[])
                 break;
             case 'p':
                 portnum = atoi(optarg);
+                break;
+            case 'm':
+                mark = atoi(optarg);
                 break;
             case 'l':
                 logger.filename = optarg;
