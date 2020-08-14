@@ -71,6 +71,7 @@ static int pending_conn_lifetime = PEP_PENDING_CONN_LIFETIME;
 static int portnum = PEP_DEFAULT_PORT;
 static int mark = 0;
 static int max_conns = (PEP_MIN_CONNS + PEP_MAX_CONNS) / 2;
+static char tcp_congestion_algo[32] = "";
 
 /*
  * The main aim of this structure is to reduce search time
@@ -186,7 +187,7 @@ static void __pep_warning(const char *function, int line, const char *fmt, ...)
 static void usage(char *name)
 {
     fprintf(stderr,"Usage: %s [-V] [-h] [-v] [-d] [-f]"
-            " [-m mark] [-p port]"
+            " [-m mark] [-p port] [-a tcp congestion algorithm]"
             " [-c max_conn] [-l logfile] [-t proxy_lifetime]"
             " [-g garbage collector interval]\n", name);
     exit(EXIT_SUCCESS);
@@ -724,6 +725,17 @@ void *listener_loop(void UNUSED(*unused))
 		}
 	}
 
+	if (strlen(tcp_congestion_algo) > 0) {
+		ret = setsockopt(out_fd, IPPROTO_TCP, TCP_CONGESTION,
+				 tcp_congestion_algo, strlen(tcp_congestion_algo));
+		if (ret < 0) {
+		    pep_error("Failed to set tcp algorithm to %s [RET = %d]",
+			      tcp_congestion_algo, ret);
+		}
+	}
+
+
+
         /*
          * Set outbound endpoint to transparent mode
          */
@@ -1159,6 +1171,10 @@ int main(int argc, char *argv[])
                 break;
             case 'm':
                 mark = atoi(optarg);
+                break;
+            case 'a':
+		strncpy(tcp_congestion_algo, optarg,
+			sizeof(tcp_congestion_algo)-1);
                 break;
             case 'l':
                 logger.filename = optarg;
