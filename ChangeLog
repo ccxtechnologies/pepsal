@@ -1,3 +1,5 @@
+2.1.0: 	- Adds an option to set the tcp congestion algorithm to use
+
 2.0.0: 	- Removed unused address option
 		- Removed useless bind on the output port
 		- Added option to mark output packets
