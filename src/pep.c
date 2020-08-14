@@ -186,7 +186,7 @@ static void __pep_warning(const char *function, int line, const char *fmt, ...)
 static void usage(char *name)
 {
     fprintf(stderr,"Usage: %s [-V] [-h] [-v] [-d] [-f]"
-            " [-a address] [-p port]"
+            " [-m mark] [-p port]"
             " [-c max_conn] [-l logfile] [-t proxy_lifetime]"
             " [-g garbage collector interval]\n", name);
     exit(EXIT_SUCCESS);
