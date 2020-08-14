@@ -1,3 +1,7 @@
+2.0.0: 	- Removed unused address option
+		- Removed useless bind on the output port
+		- Added option to mark output packets
+
 1.9.0: Added support for TCP FastOpen and TPROXY iptables target. Added debian
 packaging.
 
