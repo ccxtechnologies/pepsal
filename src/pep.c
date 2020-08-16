@@ -69,9 +69,11 @@ static int fastopen = 0;
 static int gcc_interval = PEP_GCC_INTERVAL;
 static int pending_conn_lifetime = PEP_PENDING_CONN_LIFETIME;
 static int portnum = PEP_DEFAULT_PORT;
-static int mark = 0;
+static int mark_egress = 0;
+static int mark_ingress = 0;
 static int max_conns = (PEP_MIN_CONNS + PEP_MAX_CONNS) / 2;
-static char tcp_congestion_algo[32] = "";
+static char tcp_congestion_algo_egress[32] = "";
+static char tcp_congestion_algo_ingress[32] = "";
 
 /*
  * The main aim of this structure is to reduce search time
@@ -187,8 +189,9 @@ static void __pep_warning(const char *function, int line, const char *fmt, ...)
 static void usage(char *name)
 {
     fprintf(stderr,"Usage: %s [-V] [-h] [-v] [-d] [-f]"
-            " [-m mark] [-p port] [-a tcp congestion algorithm]"
-            " [-c max_conn] [-l logfile] [-t proxy_lifetime]"
+            " [-m egress mark] [-n ingress mark]"
+        " [-a egress tcp congestion algorithm] [-b ingress tcp congestion algorithm]"
+            " [-p port] [-c max_conn] [-l logfile] [-t proxy_lifetime]"
             " [-g garbage collector interval]\n", name);
     exit(EXIT_SUCCESS);
 }
@@ -613,6 +616,25 @@ void *listener_loop(void UNUSED(*unused))
         pep_error("Failed to set IP_TRANSPARENT option! [RET = %d]", ret);
     }
 
+    if (mark_ingress >= 0) {
+        ret = setsockopt(out_fd, SOL_SOCKET, SO_MARK,
+                 &mark_ingress, sizeof(mark_ingress));
+        if (ret < 0) {
+            pep_error("Failed to set ingress mark to %d [%d]",
+                  mark_ingress, ret);
+        }
+    }
+
+    if (strlen(tcp_congestion_algo_ingress) > 0) {
+        ret = setsockopt(out_fd, IPPROTO_TCP, TCP_CONGESTION,
+                 tcp_congestion_algo_ingress,
+                 strlen(tcp_congestion_algo_ingress));
+        if (ret < 0) {
+            pep_error("Failed to set ingress tcp algorithm to %s [%d]",
+                  tcp_congestion_algo_ingress, ret);
+        }
+    }
+
     /* Set TCP_FASTOPEN socket option */
     if (fastopen) {
       optval = 5;
@@ -717,24 +739,24 @@ void *listener_loop(void UNUSED(*unused))
         out_fd = ret;
         fcntl(out_fd, F_SETFL, O_NONBLOCK);
 
-	if (mark >= 0) {
-		ret = setsockopt(out_fd, SOL_SOCKET, SO_MARK,
-				 &mark, sizeof(mark));
-		if (ret < 0) {
-		    pep_error("Failed to set mark to %d [RET = %d]", mark, ret);
-		}
-	}
+        if (mark_egress >= 0) {
+            ret = setsockopt(out_fd, SOL_SOCKET, SO_MARK,
+                             &mark_egress, sizeof(mark_egress));
+            if (ret < 0) {
+                pep_error("Failed to set egress mark to %d [%d]",
+                          mark_egress, ret);
+            }
+        }
 
-	if (strlen(tcp_congestion_algo) > 0) {
-		ret = setsockopt(out_fd, IPPROTO_TCP, TCP_CONGESTION,
-				 tcp_congestion_algo, strlen(tcp_congestion_algo));
-		if (ret < 0) {
-		    pep_error("Failed to set tcp algorithm to %s [RET = %d]",
-			      tcp_congestion_algo, ret);
-		}
-	}
-
-
+        if (strlen(tcp_congestion_algo_egress) > 0) {
+            ret = setsockopt(out_fd, IPPROTO_TCP, TCP_CONGESTION,
+                             tcp_congestion_algo_egress,
+                             strlen(tcp_congestion_algo_egress));
+            if (ret < 0) {
+                pep_error("Failed to set egress tcp algorithm to %s [%d]",
+                          tcp_congestion_algo_egress, ret);
+            }
+        }
 
         /*
          * Set outbound endpoint to transparent mode
@@ -1148,7 +1170,7 @@ int main(int argc, char *argv[])
             {0, 0, 0, 0}
         };
 
-        c = getopt_long(argc, argv, "dvVhfp:a:l:g:t:c:m:",
+        c = getopt_long(argc, argv, "dvVhfp:l:g:t:c:m:n:a:b:",
                         long_options, &option_index);
         if (c == -1)
             break;
@@ -1170,11 +1192,18 @@ int main(int argc, char *argv[])
                 portnum = atoi(optarg);
                 break;
             case 'm':
-                mark = atoi(optarg);
+                mark_egress = atoi(optarg);
+                break;
+            case 'n':
+                mark_ingress = atoi(optarg);
                 break;
             case 'a':
-		strncpy(tcp_congestion_algo, optarg,
-			sizeof(tcp_congestion_algo)-1);
+        strncpy(tcp_congestion_algo_egress, optarg,
+            sizeof(tcp_congestion_algo_egress)-1);
+                break;
+            case 'b':
+        strncpy(tcp_congestion_algo_ingress, optarg,
+            sizeof(tcp_congestion_algo_ingress)-1);
                 break;
             case 'l':
                 logger.filename = optarg;
