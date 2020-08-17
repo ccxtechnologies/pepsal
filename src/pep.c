@@ -617,7 +617,7 @@ void *listener_loop(void UNUSED(*unused))
     }
 
     if (mark_ingress > 0) {
-        ret = setsockopt(out_fd, SOL_SOCKET, SO_MARK,
+        ret = setsockopt(listenfd, SOL_SOCKET, SO_MARK,
                  &mark_ingress, sizeof(mark_ingress));
         if (ret < 0) {
             pep_error("Failed to set ingress mark to %d [%d]",
@@ -626,7 +626,7 @@ void *listener_loop(void UNUSED(*unused))
     }
 
     if (strlen(tcp_congestion_algo_ingress) > 0) {
-        ret = setsockopt(out_fd, IPPROTO_TCP, TCP_CONGESTION,
+        ret = setsockopt(listenfd, IPPROTO_TCP, TCP_CONGESTION,
                  tcp_congestion_algo_ingress,
                  strlen(tcp_congestion_algo_ingress));
         if (ret < 0) {
