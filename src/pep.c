@@ -616,7 +616,7 @@ void *listener_loop(void UNUSED(*unused))
         pep_error("Failed to set IP_TRANSPARENT option! [RET = %d]", ret);
     }
 
-    if (mark_ingress >= 0) {
+    if (mark_ingress > 0) {
         ret = setsockopt(out_fd, SOL_SOCKET, SO_MARK,
                  &mark_ingress, sizeof(mark_ingress));
         if (ret < 0) {
@@ -739,7 +739,7 @@ void *listener_loop(void UNUSED(*unused))
         out_fd = ret;
         fcntl(out_fd, F_SETFL, O_NONBLOCK);
 
-        if (mark_egress >= 0) {
+        if (mark_egress > 0) {
             ret = setsockopt(out_fd, SOL_SOCKET, SO_MARK,
                              &mark_egress, sizeof(mark_egress));
             if (ret < 0) {
