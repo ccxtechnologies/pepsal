@@ -1265,11 +1265,12 @@ int main(int argc, char *argv[])
     init_pep_threads();
     create_threads_pool(PEPPOOL_THREADS);
 
-    PEP_DEBUG("Pepsal started...");
+    pep_warning("Pepsal started...");
     pthread_join(listener, &valptr);
     pthread_join(poller, &valptr);
     pthread_join(timer_sch, &valptr);
     PEP_DEBUG("exiting...\n");
     closelog();
+    pep_warning("Pepsal stopped...");
     return 0;
 }
