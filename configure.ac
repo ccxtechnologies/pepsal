@@ -3,7 +3,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59e)
-AC_INIT(PEPSaL, 2.0.0)
+AC_INIT(PEPSaL, 2.1.3)
 AC_CONFIG_SRCDIR(src)
 AC_CONFIG_HEADER(include/config.h)
 AM_INIT_AUTOMAKE
@@ -18,7 +18,7 @@ AM_INIT_AUTOMAKE
 
 # Checks for programs.
 AC_PROG_CC
-AC_PROG_MAKE_SET                                                                                        
+AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 
 # Checks for libraries
@@ -34,7 +34,7 @@ if test \
    -o x${check_m} = xno \
    ; then
    AC_MSG_RESULT([])
-   if test x${check_nfqueue} = xno; then 
+   if test x${check_nfqueue} = xno; then
       AC_MSG_RESULT([ERROR: libnetfilter-queue required])
    fi
    if test x${check_nfnetlink} = xno; then
@@ -90,6 +90,6 @@ fi
 AC_SUBST(AM_CFLAGS, "$AM_CFLAGS -g -Wall ${WERROR} foreign")
 
 
-AC_CONFIG_FILES(Makefile 
+AC_CONFIG_FILES(Makefile
                 src/Makefile)
 AC_OUTPUT
