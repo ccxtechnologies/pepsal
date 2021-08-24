@@ -35,8 +35,8 @@ enum proxy_status {
 struct pep_proxy;
 
 struct pep_endpoint{
-	int addr;
-	unsigned short port;
+    int addr;
+    unsigned short port;
     int fd;
     struct pep_buffer buf;
     struct pep_proxy *owner;

@@ -37,7 +37,7 @@
 #include <getopt.h>
 #include <linux/netfilter.h>
 #include <netinet/ip.h>
-#include <netinet/tcp.h>
+#include <linux/tcp.h>
 #include <arpa/inet.h>
 #include <net/if.h>
 
@@ -246,14 +246,15 @@ static void logger_fn(void)
     struct pep_proxy *proxy;
     time_t tm;
     char ip_src[17], ip_dst[17];
-    int len, i = 0;
+    int len, i = 0, tcp_info_length;
+    struct tcp_info tcp_info;
 
     PEP_DEBUG("Logger invoked!");
     SYNTAB_LOCK_READ();
     tm = time(NULL);
     fprintf(logger.file, "{\"time\":%.f,\"proxies\":[",difftime(tm, (time_t) 0));
     syntab_foreach_connection(proxy) {
-	if (i > 0)
+	if (i++ > 0)
 	    fprintf(logger.file, ",");
 
         toip(ip_src, proxy->src.addr);
@@ -266,11 +267,23 @@ static void logger_fn(void)
         fprintf(logger.file, "\"sync_recv\":%.f", difftime(proxy->syn_time, (time_t) 0));
 
         if (proxy->last_rxtx != 0) {
-            fprintf(logger.file, ",\"last_act\":\"%s\"", difftime(proxy->last_rxtx, (time_t) 0));
+            fprintf(logger.file, ",\"last_rxtx\":\"%.f\"", difftime(proxy->last_rxtx, (time_t) 0));
         }
 
+	tcp_info_length = sizeof(tcp_info);
+	if ( getsockopt(proxy->dst.fd, IPPROTO_TCP, TCP_INFO, (void *)&tcp_info,
+			(socklen_t *)&tcp_info_length ) == 0 ) {
+		fprintf(logger.file,"\",rto\":%u,", tcp_info.tcpi_rto);
+		fprintf(logger.file,"\"retrans\":%u,", tcp_info.tcpi_total_retrans);
+		fprintf(logger.file,"\"rtt\":%u,", tcp_info.tcpi_rtt);
+		fprintf(logger.file,"\"rtt_var\":%u,", tcp_info.tcpi_rttvar);
+		fprintf(logger.file,"\"btyes_recv\":%u,", tcp_info.tcpi_bytes_received);
+		fprintf(logger.file,"\"segs_in\":%u,", tcp_info.tcpi_segs_in);
+		fprintf(logger.file,"\"segs_out\":%u,", tcp_info.tcpi_segs_out);
+		fprintf(logger.file,"\"tcp_delivery_rate_byps\":%lu", tcp_info.tcpi_delivery_rate);
+	}
+
 	fprintf(logger.file, "}");
-	i++;
     }
     fprintf(logger.file, "]}\n");
 
@@ -639,7 +652,7 @@ void *listener_loop(void UNUSED(*unused))
     /* Set TCP_FASTOPEN socket option */
     if (fastopen) {
       optval = 5;
-      ret = setsockopt(listenfd, SOL_TCP, TCP_FASTOPEN,
+      ret = setsockopt(listenfd, IPPROTO_TCP, TCP_FASTOPEN,
                        &optval, sizeof(optval));
       if (ret < 0) {
           pep_error("Failed to set TCP_FASTOPEN option! [RET = %d]", ret);
