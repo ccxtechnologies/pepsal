@@ -1075,9 +1075,18 @@ static void *timer_sch_loop(void __attribute__((unused)) *unused)
 
     if (logger.filename) {
         PEP_DEBUG("Setting up PEP logger");
-        logger.file = fopen(logger.filename, "w+");
-        if (!logger.file) {
+
+        if (strcmp(logger.filename, "stdout") == 0) {
+            logger.file = stdout;
+        } else if (strcmp(logger.filename, "stderr") == 0) {
+            logger.file = stderr;
+        } else {
+            logger.file = fopen(logger.filename, "w+");
+        }
+
+        if (logger.file < 0) {
             pep_error("Failed to open log file %s!", logger.filename);
+	    logger.filename = NULL;
         }
         gettimeofday(&last_log_evt_time, 0);
         gettimeofday(&last_gc_evt_time, 0);
@@ -1085,7 +1094,7 @@ static void *timer_sch_loop(void __attribute__((unused)) *unused)
 
     for(;;) {
         gettimeofday(&now, 0);
-        if (logger.file && now.tv_sec > last_log_evt_time.tv_sec + PEPLOGGER_INTERVAL) {
+        if (logger.filename && now.tv_sec > last_log_evt_time.tv_sec + PEPLOGGER_INTERVAL) {
             logger_fn();
             gettimeofday(&last_log_evt_time, 0);
         }
