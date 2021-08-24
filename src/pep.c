@@ -273,14 +273,13 @@ static void logger_fn(void)
 	tcp_info_length = sizeof(tcp_info);
 	if ( getsockopt(proxy->dst.fd, IPPROTO_TCP, TCP_INFO, (void *)&tcp_info,
 			(socklen_t *)&tcp_info_length ) == 0 ) {
-		fprintf(logger.file,",\"rto\":%u,", tcp_info.tcpi_rto);
-		fprintf(logger.file,"\"retrans\":%u,", tcp_info.tcpi_total_retrans);
-		fprintf(logger.file,"\"rtt\":%u,", tcp_info.tcpi_rtt);
+		fprintf(logger.file,",\"rtt\":%u,", tcp_info.tcpi_rtt);
 		fprintf(logger.file,"\"rtt_var\":%u,", tcp_info.tcpi_rttvar);
-		fprintf(logger.file,"\"btyes_recv\":%u,", tcp_info.tcpi_bytes_received);
-		fprintf(logger.file,"\"segs_in\":%u,", tcp_info.tcpi_segs_in);
-		fprintf(logger.file,"\"segs_out\":%u,", tcp_info.tcpi_segs_out);
-		fprintf(logger.file,"\"tcp_delivery_rate_byps\":%lu", tcp_info.tcpi_delivery_rate);
+		fprintf(logger.file,"\"retransmits\":%u,", tcp_info.tcpi_total_retrans);
+		fprintf(logger.file,"\"cwnd\":%u,", tcp_info.tcpi_snd_cwnd);
+		fprintf(logger.file,"\"pacing_rate\":%u,", tcp_info.tcpi_pacing_rate);
+		fprintf(logger.file,"\"max_pacing_rate\":%u,", tcp_info.tcpi_max_pacing_rate);
+		fprintf(logger.file,"\"delivery_rate\":%lu", tcp_info.tcpi_delivery_rate);
 	}
 
 	fprintf(logger.file, "}");
