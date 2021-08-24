@@ -245,33 +245,34 @@ static void logger_fn(void)
 {
     struct pep_proxy *proxy;
     time_t tm;
-    char ip_src[17], ip_dst[17], timebuf[128];
-    int i = 1, len;
+    char ip_src[17], ip_dst[17];
+    int len, i = 0;
 
     PEP_DEBUG("Logger invoked!");
     SYNTAB_LOCK_READ();
     tm = time(NULL);
-    ctime_r(&tm, timebuf);
-    len = strlen(timebuf);
-    timebuf[len - 1] = ']';
-    fprintf(logger.file, "=== [%s ===\n", timebuf);
+    fprintf(logger.file, "{\"time\":%.f,\"proxies\":[",difftime(tm, (time_t) 0));
     syntab_foreach_connection(proxy) {
+	if (i > 0)
+	    fprintf(logger.file, ",");
+
         toip(ip_src, proxy->src.addr);
         toip(ip_dst, proxy->dst.addr);
-        fprintf(logger.file, "[%d] Proxy %s:%d <-> %s:%d\n", i++,
+        fprintf(logger.file, "{\"src\":\"%s:%d\",\"dst\":\"%s:%d\",",
                 ip_src, proxy->src.port, ip_dst, proxy->dst.port);
-        fprintf(logger.file, "    Status: %s\n", conn_stat[proxy->status]);
-        ctime_r(&proxy->syn_time, timebuf);
-        fprintf(logger.file, "    SYN received: %s", timebuf);
+
+        fprintf(logger.file, "\"status\":\"%s\",", conn_stat[proxy->status]);
+
+        fprintf(logger.file, "\"sync_recv\":%.f", difftime(proxy->syn_time, (time_t) 0));
+
         if (proxy->last_rxtx != 0) {
-            ctime_r(&proxy->last_rxtx, timebuf);
-            fprintf(logger.file, "    Last Rx/Tx activity: %s", timebuf);
+            fprintf(logger.file, ",\"last_act\":\"%s\"", difftime(proxy->last_rxtx, (time_t) 0));
         }
 
+	fprintf(logger.file, "}");
+	i++;
     }
-    if (i == 1) {
-        fprintf(logger.file, " No connections\n");
-    }
+    fprintf(logger.file, "]}\n");
 
     SYNTAB_UNLOCK_READ();
     fflush(logger.file);

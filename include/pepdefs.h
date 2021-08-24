@@ -34,7 +34,7 @@
 /* Number of worker threads in pepsal threads pool */
 #define PEPPOOL_THREADS 10
 
-#define PEPLOGGER_INTERVAL (5 * 60)
+#define PEPLOGGER_INTERVAL 10
 
 #define PEP_GCC_INTERVAL (15 * 3600)
 
