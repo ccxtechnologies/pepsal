@@ -267,13 +267,13 @@ static void logger_fn(void)
         fprintf(logger.file, "\"sync_recv\":%.f", difftime(proxy->syn_time, (time_t) 0));
 
         if (proxy->last_rxtx != 0) {
-            fprintf(logger.file, ",\"last_rxtx\":\"%.f\"", difftime(proxy->last_rxtx, (time_t) 0));
+            fprintf(logger.file, ",\"last_rxtx\":%.f", difftime(proxy->last_rxtx, (time_t) 0));
         }
 
 	tcp_info_length = sizeof(tcp_info);
 	if ( getsockopt(proxy->dst.fd, IPPROTO_TCP, TCP_INFO, (void *)&tcp_info,
 			(socklen_t *)&tcp_info_length ) == 0 ) {
-		fprintf(logger.file,"\",rto\":%u,", tcp_info.tcpi_rto);
+		fprintf(logger.file,",\"rto\":%u,", tcp_info.tcpi_rto);
 		fprintf(logger.file,"\"retrans\":%u,", tcp_info.tcpi_total_retrans);
 		fprintf(logger.file,"\"rtt\":%u,", tcp_info.tcpi_rtt);
 		fprintf(logger.file,"\"rtt_var\":%u,", tcp_info.tcpi_rttvar);
