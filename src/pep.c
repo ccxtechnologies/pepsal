@@ -69,8 +69,8 @@ static int fastopen = 0;
 static int gcc_interval = PEP_GCC_INTERVAL;
 static int pending_conn_lifetime = PEP_PENDING_CONN_LIFETIME;
 static int portnum = PEP_DEFAULT_PORT;
-static int mark_egress = 0;
-static int mark_ingress = 0;
+static unsigned int mark_egress = 0;
+static unsigned int mark_ingress = 0;
 static int max_conns = (PEP_MIN_CONNS + PEP_MAX_CONNS) / 2;
 static char tcp_congestion_algo_egress[32] = "";
 static char tcp_congestion_algo_ingress[32] = "";
@@ -1168,6 +1168,15 @@ static void create_threads_pool(int num_threads)
     }
 }
 
+unsigned int atoui(char *st) {
+  char *x;
+  for (x = st ; *x ; x++) {
+    if (!isdigit(*x))
+      return 0L;
+  }
+  return (strtoul(st, 0L, 10));
+}
+
 int main(int argc, char *argv[])
 {
     int c, ret, numfds;
@@ -1214,10 +1223,10 @@ int main(int argc, char *argv[])
                 portnum = atoi(optarg);
                 break;
             case 'm':
-                mark_egress = atoi(optarg);
+                mark_egress = atoui(optarg);
                 break;
             case 'n':
-                mark_ingress = atoi(optarg);
+                mark_ingress = atoui(optarg);
                 break;
             case 'a':
         strncpy(tcp_congestion_algo_egress, optarg,
