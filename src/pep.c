@@ -46,6 +46,7 @@
 #include <time.h>
 #include <signal.h>
 #include <syslog.h>
+#include <ctype.h>
 
 #include <sys/time.h>
 
@@ -595,7 +596,7 @@ err:
 void *listener_loop(void UNUSED(*unused))
 {
     int                 listenfd, optval, ret, connfd, out_fd;
-    struct sockaddr_in  cliaddr, servaddr, r_servaddr;
+    struct sockaddr_in  cliaddr, servaddr, r_servaddr, proxy_servaddr;
     socklen_t           len;
     struct pep_proxy   *proxy;
     struct hostent     *host;
@@ -782,6 +783,21 @@ void *listener_loop(void UNUSED(*unused))
 
         toip(ipbuf, proxy->src.addr);
         toip(ipbuf1, proxy->dst.addr);
+
+	memset(&proxy_servaddr, 0, sizeof(proxy_servaddr));
+	proxy_servaddr.sin_family = AF_INET;
+	proxy_servaddr.sin_addr.s_addr = inet_addr(ipbuf);
+	proxy_servaddr.sin_port = htons(proxy->src.port);
+	PEP_DEBUG("# Binding socket [%s:%d] --> [%s:%d]",
+		  ipbuf, proxy->src.port, ipbuf1, proxy->dst.port);
+
+	ret = bind(out_fd, (struct sockaddr *)&proxy_servaddr,
+		   sizeof(proxy_servaddr));
+	if (ret < 0) {
+		pep_warning("Failed to bind proxy socket! [%s:%d]",
+			    strerror(errno), errno);
+		goto close_connection;
+	}
 
         if (fastopen) {
           ret = sendto(out_fd, PEPBUF_WPOS(&proxy->src.buf), 0, MSG_FASTOPEN,
