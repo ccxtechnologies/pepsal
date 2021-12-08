@@ -781,6 +781,19 @@ void *listener_loop(void UNUSED(*unused))
             pep_error("Failed to set IP_TRANSPARENT option! [RET = %d]", ret);
         }
 
+	if (fastopen) {
+		ret = sendto(out_fd, PEPBUF_WPOS(&proxy->src.buf), 0, MSG_FASTOPEN,
+			     (struct sockaddr *)&r_servaddr, sizeof(r_servaddr));
+	}
+	else {
+		ret = connect(out_fd, (struct sockaddr *)&r_servaddr,
+			      sizeof(r_servaddr));
+	}
+	if ((ret < 0) && !nonblocking_err_p(errno)) {
+		pep_warning("Failed to connect! [%s:%d]", strerror(errno), errno);
+		goto close_connection;
+	}
+
         proxy->src.fd = connfd;
         proxy->dst.fd = out_fd;
         if (proxy->status == PST_CLOSED) {
