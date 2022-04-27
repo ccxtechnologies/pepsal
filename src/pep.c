@@ -50,6 +50,11 @@
 
 #include <sys/time.h>
 
+/* these are based on expected maximums, from the IP/TCP standards
+ * there may be a better way of calculating these header sizes */
+#define IP_HEADER_SIZE	24
+#define TCP_HEADER_SIZE 26
+
 /*
  * Data structure to fill with packet headers when we
  * get a new syn:
@@ -618,6 +623,7 @@ void *listener_loop(void UNUSED(*unused))
 		char                ipbuf[17], ipbuf1[17];
 		unsigned short      r_port, c_port;
 		struct syntab_key   key;
+		int					ingress_maxseg;
 
 		listenfd = socket(AF_INET, SOCK_STREAM, 0);
 		if (listenfd < 0) {
@@ -671,6 +677,17 @@ void *listener_loop(void UNUSED(*unused))
 								&optval, sizeof(optval));
 				if (ret < 0) {
 						pep_error("Failed to set TCP_FASTOPEN option! [RET = %d]", ret);
+				}
+		}
+
+		/* update ingress MSS if required */
+		if (ingress_mtu > 80) {
+				ingress_maxseg = ingress_mtu - IP_HEADER_SIZE - TCP_HEADER_SIZE;
+
+				ret = setsockopt(listenfd, IPPROTO_TCP, TCP_MAXSEG,
+								&ingress_maxseg, sizeof(ingress_maxseg));
+				if (ret < 0) {
+					pep_error("Failed to set ingress TCP_MAXSEG to %d [RET = %d]", ingress_maxseg, ret);
 				}
 		}
 
