@@ -247,7 +247,7 @@ static void logger_fn(void)
     struct pep_proxy *proxy;
     time_t tm;
     char ip_src[17], ip_dst[17];
-    int len, i = 0, tcp_info_length;
+    int len, i = 0, tcp_info_length, curr_mss, curr_mss_len;
     struct tcp_info tcp_info;
 
     PEP_DEBUG("Logger invoked!");
@@ -255,35 +255,48 @@ static void logger_fn(void)
     tm = time(NULL);
     fprintf(logger.file, "{\"time\":%.f,\"proxies\":[",difftime(tm, (time_t) 0));
     syntab_foreach_connection(proxy) {
-	if (i++ > 0)
-	    fprintf(logger.file, ",");
+			if (i++ > 0)
+				fprintf(logger.file, ",");
 
-        toip(ip_src, proxy->src.addr);
-        toip(ip_dst, proxy->dst.addr);
-        fprintf(logger.file, "{\"src\":\"%s:%d\",\"dst\":\"%s:%d\",",
-                ip_src, proxy->src.port, ip_dst, proxy->dst.port);
+			toip(ip_src, proxy->src.addr);
+			toip(ip_dst, proxy->dst.addr);
+			fprintf(logger.file, "{\"src\":\"%s:%d\",\"dst\":\"%s:%d\",",
+					ip_src, proxy->src.port, ip_dst, proxy->dst.port);
 
-        fprintf(logger.file, "\"status\":\"%s\",", conn_stat[proxy->status]);
+			fprintf(logger.file, "\"status\":\"%s\",", conn_stat[proxy->status]);
 
-        fprintf(logger.file, "\"sync_recv\":%.f", difftime(proxy->syn_time, (time_t) 0));
+			fprintf(logger.file, "\"sync_recv\":%.f", difftime(proxy->syn_time, (time_t) 0));
 
-        if (proxy->last_rxtx != 0) {
-            fprintf(logger.file, ",\"last_rxtx\":%.f", difftime(proxy->last_rxtx, (time_t) 0));
-        }
+			if (proxy->last_rxtx != 0) {
+				fprintf(logger.file, ",\"last_rxtx\":%.f", difftime(proxy->last_rxtx, (time_t) 0));
+			}
 
-	tcp_info_length = sizeof(tcp_info);
-	if ( getsockopt(proxy->dst.fd, IPPROTO_TCP, TCP_INFO, (void *)&tcp_info,
-			(socklen_t *)&tcp_info_length ) == 0 ) {
-		fprintf(logger.file,",\"rtt\":%u,", tcp_info.tcpi_rtt);
-		fprintf(logger.file,"\"rtt_var\":%u,", tcp_info.tcpi_rttvar);
-		fprintf(logger.file,"\"retransmits\":%u,", tcp_info.tcpi_total_retrans);
-		fprintf(logger.file,"\"cwnd\":%u,", tcp_info.tcpi_snd_cwnd);
-		fprintf(logger.file,"\"pacing_rate\":%u,", tcp_info.tcpi_pacing_rate);
-		fprintf(logger.file,"\"max_pacing_rate\":%u,", tcp_info.tcpi_max_pacing_rate);
-		fprintf(logger.file,"\"delivery_rate\":%lu", tcp_info.tcpi_delivery_rate);
-	}
+			curr_mss_len = sizeof(curr_mss);
+			if ( getsockopt(proxy->dst.fd, IPPROTO_TCP, TCP_MAXSEG, (void *)&curr_mss,
+					(socklen_t *)&curr_mss_len ) == 0 ) {
+				fprintf(logger.file,",\"mss dst\":%d", curr_mss);
+			}
 
-	fprintf(logger.file, "}");
+			curr_mss_len = sizeof(curr_mss);
+			if ( getsockopt(proxy->src.fd, IPPROTO_TCP, TCP_MAXSEG, (void *)&curr_mss,
+					(socklen_t *)&curr_mss_len ) == 0 ) {
+				fprintf(logger.file,",\"mss src\":%d", curr_mss);
+			}
+
+			tcp_info_length = sizeof(tcp_info);
+			if ( getsockopt(proxy->dst.fd, IPPROTO_TCP, TCP_INFO, (void *)&tcp_info,
+					(socklen_t *)&tcp_info_length ) == 0 ) {
+				fprintf(logger.file,",\"rtt\":%u,", tcp_info.tcpi_rtt);
+				fprintf(logger.file,"\"rtt_var\":%u,", tcp_info.tcpi_rttvar);
+				fprintf(logger.file,"\"retransmits\":%u,", tcp_info.tcpi_total_retrans);
+				fprintf(logger.file,"\"cwnd\":%u,", tcp_info.tcpi_snd_cwnd);
+				fprintf(logger.file,"\"pacing_rate\":%u,", tcp_info.tcpi_pacing_rate);
+				fprintf(logger.file,"\"max_pacing_rate\":%u,", tcp_info.tcpi_max_pacing_rate);
+				fprintf(logger.file,"\"delivery_rate\":%lu", tcp_info.tcpi_delivery_rate);
+			}
+
+
+			fprintf(logger.file, "}");
     }
     fprintf(logger.file, "]}\n");
 
