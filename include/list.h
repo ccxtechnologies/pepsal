@@ -28,8 +28,8 @@
  * @brief List node
  */
 struct list_node {
-    struct list_node *next;
-    struct list_node *prev;
+		struct list_node *next;
+		struct list_node *prev;
 };
 
 /**
@@ -42,7 +42,7 @@ struct list_node {
  * starts and where it ends)
  */
 struct list_head {
-    struct list_node head; /**< Head element of the list */
+		struct list_node head; /**< Head element of the list */
 };
 
 
@@ -52,7 +52,7 @@ struct list_head {
  * @param name - name of variable
  */
 #define LIST_DEFINE(name)                           \
-    struct list_head (name) = LIST_INITIALIZE(name)
+		struct list_head (name) = LIST_INITIALIZE(name)
 
 /**
  * @def LIST_INITIALIZE
@@ -60,10 +60,10 @@ struct list_head {
  * @param name - list name
  */
 #define LIST_INITIALIZE(name)                   \
-    { .head = { &(name).head, &(name).head } }
+{ .head = { &(name).head, &(name).head } }
 
 #define list_node2head(node)                    \
-    ((struct list_head *)(node))
+		((struct list_head *)(node))
 
 /**
  * @fn static __inline void list_init_head(struct list_head *lst)
@@ -72,7 +72,7 @@ struct list_head {
  */
 static __inline void list_init_head(struct list_head *lst)
 {
-    lst->head.next = lst->head.prev = &lst->head;
+		lst->head.next = lst->head.prev = &lst->head;
 }
 
 /**
@@ -82,22 +82,22 @@ static __inline void list_init_head(struct list_head *lst)
  */
 static __inline void list_init_node(struct list_node *node)
 {
-    node->next = NULL;
-    node->prev = NULL;
+		node->next = NULL;
+		node->prev = NULL;
 }
 
 static __inline int list_node_next_isbound(struct list_node *node)
 {
-    return (node->next != NULL);
+		return (node->next != NULL);
 }
 
 static __inline int list_node_prev_isbound(struct list_node *node)
 {
-    return (node->prev != NULL);
+		return (node->prev != NULL);
 }
 
 #define list_node_is_bound(node)                                    \
-    (list_node_next_isbound(node) && list_node_prev_isbound(node))
+		(list_node_next_isbound(node) && list_node_prev_isbound(node))
 
 /**
  * @def list_entry(lst, nptr)
@@ -107,7 +107,7 @@ static __inline int list_node_prev_isbound(struct list_node *node)
  * @return A pointer to the object given node contains
  */
 #define list_entry(node, type, member)          \
-    container_of(node, type, member)
+		container_of(node, type, member)
 
 /**
  * @def list_head(lst)
@@ -116,7 +116,7 @@ static __inline int list_node_prev_isbound(struct list_node *node)
  * @return A pointer to header struct list_node
  */
 #define list_head(lst)                          \
-    (&(lst)->head)
+		(&(lst)->head)
 
 /**
  * @def list_node_first(lst)
@@ -125,7 +125,7 @@ static __inline int list_node_prev_isbound(struct list_node *node)
  * @return A pointer to the list first node
  */
 #define list_node_first(lst)                    \
-    ((lst)->head.next)
+		((lst)->head.next)
 
 /**
  * @def list_node_last(lst)
@@ -134,7 +134,7 @@ static __inline int list_node_prev_isbound(struct list_node *node)
  * @return A pointer to the list last node
  */
 #define list_node_last(lst)                     \
-    ((lst)->head.prev)
+		((lst)->head.prev)
 
 /**
  * @def list_add2head(lst, new)
@@ -143,7 +143,7 @@ static __inline int list_node_prev_isbound(struct list_node *node)
  * @param new - A pointer to the list node
  */
 #define list_add2head(lst, new)                 \
-    list_add_before(list_node_first(lst), new)
+		list_add_before(list_node_first(lst), new)
 
 /**
  * @def list_add2tail(lst, new)
@@ -152,7 +152,7 @@ static __inline int list_node_prev_isbound(struct list_node *node)
  * @param new - A pointer to node to add
  */
 #define list_add2tail(lst, new)                 \
-    list_add_before(list_head(lst), new)
+		list_add_before(list_head(lst), new)
 
 /**
  * @def list_delfromhead(lst)
@@ -160,7 +160,7 @@ static __inline int list_node_prev_isbound(struct list_node *node)
  * @param lst - A pointer to the list
  */
 #define list_delfromhead(lst)					\
-    list_del(list_node_first(lst))
+		list_del(list_node_first(lst))
 
 /**
  * @def list_delfromtail(lst)
@@ -168,7 +168,7 @@ static __inline int list_node_prev_isbound(struct list_node *node)
  * @param list - A pointer to the list
  */
 #define list_delfromtail(lst)					\
-    list_del(list_node_last(lst))
+		list_del(list_node_last(lst))
 
 /**
  * @def list_del(del)
@@ -176,7 +176,7 @@ static __inline int list_node_prev_isbound(struct list_node *node)
  * @param del - A node to remove
  */
 #define list_del(del)                           \
-    (list_del_range(del, del))
+		(list_del_range(del, del))
 
 /**
  * @def list_add_before(before, new)
@@ -184,7 +184,7 @@ static __inline int list_node_prev_isbound(struct list_node *node)
  * @param new     - A node to insert
  */
 #define list_add_before(before, new)                    \
-    (list_add_range(new, new, (before)->prev, before))
+		(list_add_range(new, new, (before)->prev, before))
 
 /**
  * @def list_add_after(after, new)
@@ -192,7 +192,7 @@ static __inline int list_node_prev_isbound(struct list_node *node)
  * @param new   - A node to insert
  */
 #define list_add_after(after, new)                      \
-    (list_add_range(new, new, (after), (after)->next))
+		(list_add_range(new, new, (after), (after)->next))
 
 /**
  * @def list_move2head(to, from)
@@ -201,7 +201,7 @@ static __inline int list_node_prev_isbound(struct list_node *node)
  * @param from - source list
  */
 #define list_move2head(to, from)                            \
-    (list_move(list_head(to), list_node_first(to), from))
+		(list_move(list_head(to), list_node_first(to), from))
 
 /**
  * @def list_move2tail(to, from)
@@ -210,7 +210,7 @@ static __inline int list_node_prev_isbound(struct list_node *node)
  * @param from - source list
  */
 #define list_move2tail(to, from)                            \
-    (list_move(list_node_last(to), list_head(to), from))
+		(list_move(list_node_last(to), list_head(to), from))
 
 /**
  * @def list_for_each(lst, liter)
@@ -219,8 +219,8 @@ static __inline int list_node_prev_isbound(struct list_node *node)
  * @param liter - A pointer to list which will be used for iteration
  */
 #define list_for_each(lst, liter)                               \
-    for (liter = list_node_first(lst);                          \
-         (liter) != list_head(lst); (liter) = (liter)->next)
+		for (liter = list_node_first(lst);                          \
+						(liter) != list_head(lst); (liter) = (liter)->next)
 
 /**
  * @def list_for_each_safe(lst, liter, save)
@@ -234,9 +234,9 @@ static __inline int list_node_prev_isbound(struct list_node *node)
  * @param save  - The same
  */
 #define list_for_each_safe(lst, liter, save)                    \
-    for (liter = list_node_first(lst), save = (liter)->next;    \
-         (liter) != list_head(lst); (liter) = (save),           \
-             (save) = (liter)->next)
+		for (liter = list_node_first(lst), save = (liter)->next;    \
+						(liter) != list_head(lst); (liter) = (save),           \
+						(save) = (liter)->next)
 
 /**
  * @def list_for_each_entry(lst, iter, member)
@@ -246,9 +246,9 @@ static __inline int list_node_prev_isbound(struct list_node *node)
  * @param member - name of list node member in the parent structure
  */
 #define list_for_each_entry(lst, iter, type, member)                    \
-    for (iter = list_entry(list_node_first(lst), type, member); \
-         &iter->member != list_head(lst);                               \
-         iter = list_entry(iter->member.next, type, member))
+		for (iter = list_entry(list_node_first(lst), type, member); \
+						&iter->member != list_head(lst);                               \
+						iter = list_entry(iter->member.next, type, member))
 
 
 /**
@@ -259,7 +259,7 @@ static __inline int list_node_prev_isbound(struct list_node *node)
  */
 static __inline int list_is_empty(struct list_head *list)
 {
-    return (list_node_first(list) == list_head(list));
+		return (list_node_first(list) == list_head(list));
 }
 
 /**
@@ -272,25 +272,25 @@ static __inline int list_is_empty(struct list_head *list)
  * @param first - first node of range
  * @param last  - last node of range
  * @param prev  - after this node a range will be inserted
- * @param next  - before this node a range will be inserted 
+ * @param next  - before this node a range will be inserted
  */
 static __inline void list_add_range(struct list_node *first,
-                                    struct list_node *last,
-                                    struct list_node *prev,
-                                    struct list_node *next)
+				struct list_node *last,
+				struct list_node *prev,
+				struct list_node *next)
 {
-    first->prev = prev;
-    last->next = next;
-    next->prev = last;
-    prev->next = first;
+		first->prev = prev;
+		last->next = next;
+		next->prev = last;
+		prev->next = first;
 }
 
 /* for internal usage */
 static __inline void __list_del_range(struct list_node *first,
-                                    struct list_node *last)
+				struct list_node *last)
 {
-    first->prev->next = last->next;
-    last->next->prev = first->prev;
+		first->prev->next = last->next;
+		last->next->prev = first->prev;
 }
 
 /**
@@ -301,11 +301,11 @@ static __inline void __list_del_range(struct list_node *first,
  * @param last - last node to delete
  */
 static __inline void list_del_range(struct list_node *first,
-                                  struct list_node *last)
+				struct list_node *last)
 {
-    __list_del_range(first, last);
-    first->prev = NULL;
-    last->next = NULL;
+		__list_del_range(first, last);
+		first->prev = NULL;
+		last->next = NULL;
 }
 
 /**
@@ -320,11 +320,11 @@ static __inline void list_del_range(struct list_node *first,
  * @param last  - The last node in the cutted sequence
  */
 static __inline void list_cut_sublist(struct list_node *first,
-                                    struct list_node *last)
+				struct list_node *last)
 {
-    __list_del_range(first, last);
-    first->prev = last;
-    last->next = first;
+		__list_del_range(first, last);
+		first->prev = last;
+		last->next = first;
 }
 
 /**
@@ -336,7 +336,7 @@ static __inline void list_cut_sublist(struct list_node *first,
  */
 static __inline void list_cut_head(struct list_head *head)
 {
-    list_cut_sublist(list_node_first(head), list_node_last(head));
+		list_cut_sublist(list_node_first(head), list_node_last(head));
 }
 
 /**
@@ -348,10 +348,10 @@ static __inline void list_cut_head(struct list_head *head)
  * @see list_set_head
  */
 static __inline void list_set_head(struct list_head *new_head,
-                                 struct list_node *cyclist)
+				struct list_node *cyclist)
 {
-    list_add_range(cyclist, cyclist->prev,
-                   list_node_first(new_head), list_node_last(new_head));
+		list_add_range(cyclist, cyclist->prev,
+						list_node_first(new_head), list_node_last(new_head));
 }
 
 /**
@@ -363,13 +363,12 @@ static __inline void list_set_head(struct list_head *new_head,
  * @param next - a node before which nodes of @a from will be inserted
  */
 static __inline void list_move(struct list_node *prev,
-                               struct list_node *next,
-                               struct list_head *from)
+				struct list_node *next,
+				struct list_head *from)
 {
-    list_add_range(list_node_first(from), list_node_last(from),
-                   prev, next);
-    list_init_head(from);
+		list_add_range(list_node_first(from), list_node_last(from),
+						prev, next);
+		list_init_head(from);
 }
 
 #endif /* __LIST_H__ */
-

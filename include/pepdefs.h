@@ -42,11 +42,11 @@
 
 #ifndef offsetof
 #define offsetof(type, field)                               \
-    ((size_t)&(((type *)0)->field) - (size_t)((type *)0))
+		((size_t)&(((type *)0)->field) - (size_t)((type *)0))
 #endif /* !offsetof */
 
 #define container_of(ptr, type, member)                 \
-    (type *)((char *)(ptr) - offsetof(type, member))
+		(type *)((char *)(ptr) - offsetof(type, member))
 
 #if (defined(__cplusplus) || defined(__GNUC__) || defined(__INTEL_COMPILER))
 #define __inline inline

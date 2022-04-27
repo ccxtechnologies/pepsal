@@ -19,15 +19,15 @@
 #include "pepsal.h"
 
 struct syn_table{
-    struct hashtable  *hash;
-    struct list_head   conns;
-    pthread_rwlock_t   lock;
-    int                num_items;
+		struct hashtable  *hash;
+		struct list_head   conns;
+		pthread_rwlock_t   lock;
+		int                num_items;
 };
 
 struct syntab_key {
-    int addr;
-    unsigned short port;
+		int addr;
+		unsigned short port;
 } __attribute__((packed));
 
 #define GET_SYNTAB() (&syntab)
@@ -40,7 +40,7 @@ struct syntab_key {
 extern struct syn_table syntab;
 
 #define syntab_foreach_connection(con)                                  \
-    list_for_each_entry(&GET_SYNTAB()->conns, con, struct pep_proxy, lnode)
+		list_for_each_entry(&GET_SYNTAB()->conns, con, struct pep_proxy, lnode)
 
 int syntab_init(int num_conns);
 void syntab_format_key(struct pep_proxy *proxy, struct syntab_key *key);

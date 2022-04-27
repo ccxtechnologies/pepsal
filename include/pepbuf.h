@@ -15,12 +15,12 @@
 #include "pepdefs.h"
 
 struct pep_buffer {
-    void *space;
-    char *r_pos;
-    char *w_pos;
-    size_t rbytes;
-    size_t space_left;
-    size_t total_size;
+		void *space;
+		char *r_pos;
+		char *w_pos;
+		size_t rbytes;
+		size_t space_left;
+		size_t total_size;
 };
 
 #define pepbuf_empty(pbuf)       ((pbuf)->rbytes == 0)

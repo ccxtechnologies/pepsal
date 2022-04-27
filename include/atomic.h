@@ -6,7 +6,7 @@
 #endif /* !GCC */
 
 typedef struct __atomic {
-    volatile int val;
+		volatile int val;
 } atomic_t;
 
 #define atomic_read(a)   ((a)->val)
@@ -14,22 +14,22 @@ typedef struct __atomic {
 
 static inline int atomic_inc(atomic_t *a)
 {
-    return __sync_fetch_and_add(&a->val, 1);
+		return __sync_fetch_and_add(&a->val, 1);
 }
 
 static inline int atomic_dec(atomic_t *a)
 {
-    return __sync_fetch_and_sub(&a->val, 1);
+		return __sync_fetch_and_sub(&a->val, 1);
 }
 
 static inline int atomic_and(atomic_t *a, int mask)
 {
-    return __sync_fetch_and_and(&a->val, mask);
+		return __sync_fetch_and_and(&a->val, mask);
 }
 
 static inline int atomic_or(atomic_t *a, int mask)
 {
-    return __sync_fetch_and_or(&a->val, mask);
+		return __sync_fetch_and_or(&a->val, mask);
 }
 
 #endif /* __ATOMIC_H */
