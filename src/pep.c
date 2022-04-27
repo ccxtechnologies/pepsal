@@ -70,6 +70,7 @@ static int fastopen = 0;
 static int gcc_interval = PEP_GCC_INTERVAL;
 static int pending_conn_lifetime = PEP_PENDING_CONN_LIFETIME;
 static int portnum = PEP_DEFAULT_PORT;
+static int ingress_mtu = 0;
 static unsigned int mark_egress = 0;
 static unsigned int mark_ingress = 0;
 static int max_conns = (PEP_MIN_CONNS + PEP_MAX_CONNS) / 2;
@@ -191,7 +192,8 @@ static void usage(char *name)
 {
     fprintf(stderr,"Usage: %s [-V] [-h] [-v] [-d] [-f]"
             " [-m egress mark] [-n ingress mark]"
-        " [-a egress tcp congestion algorithm] [-b ingress tcp congestion algorithm]"
+            " [-a egress tcp congestion algorithm] [-b ingress tcp congestion algorithm]"
+			" [-u mtu of ingress device]"
             " [-p port] [-c max_conn] [-l logfile] [-t proxy_lifetime]"
             " [-g garbage collector interval]\n", name);
     exit(EXIT_SUCCESS);
@@ -274,13 +276,13 @@ static void logger_fn(void)
 			curr_mss_len = sizeof(curr_mss);
 			if ( getsockopt(proxy->dst.fd, IPPROTO_TCP, TCP_MAXSEG, (void *)&curr_mss,
 					(socklen_t *)&curr_mss_len ) == 0 ) {
-				fprintf(logger.file,",\"mss dst\":%d", curr_mss);
+				fprintf(logger.file,",\"mss egress\":%d", curr_mss);
 			}
 
 			curr_mss_len = sizeof(curr_mss);
 			if ( getsockopt(proxy->src.fd, IPPROTO_TCP, TCP_MAXSEG, (void *)&curr_mss,
 					(socklen_t *)&curr_mss_len ) == 0 ) {
-				fprintf(logger.file,",\"mss src\":%d", curr_mss);
+				fprintf(logger.file,",\"mss ingress\":%d", curr_mss);
 			}
 
 			tcp_info_length = sizeof(tcp_info);
@@ -1212,7 +1214,7 @@ int main(int argc, char *argv[])
             {0, 0, 0, 0}
         };
 
-        c = getopt_long(argc, argv, "dvVhfp:l:g:t:c:m:n:a:b:",
+        c = getopt_long(argc, argv, "dvVhfp:l:g:t:c:m:n:a:b:u:",
                         long_options, &option_index);
         if (c == -1)
             break;
@@ -1233,6 +1235,9 @@ int main(int argc, char *argv[])
             case 'p':
                 portnum = atoi(optarg);
                 break;
+            case 'u':
+                ingress_mtu = atoi(optarg);
+                break;
             case 'm':
                 mark_egress = atoui(optarg);
                 break;
@@ -1240,12 +1245,12 @@ int main(int argc, char *argv[])
                 mark_ingress = atoui(optarg);
                 break;
             case 'a':
-        strncpy(tcp_congestion_algo_egress, optarg,
-            sizeof(tcp_congestion_algo_egress)-1);
+                strncpy(tcp_congestion_algo_egress, optarg,
+                sizeof(tcp_congestion_algo_egress)-1);
                 break;
             case 'b':
-        strncpy(tcp_congestion_algo_ingress, optarg,
-            sizeof(tcp_congestion_algo_ingress)-1);
+                strncpy(tcp_congestion_algo_ingress, optarg,
+                sizeof(tcp_congestion_algo_ingress)-1);
                 break;
             case 'l':
                 logger.filename = optarg;
