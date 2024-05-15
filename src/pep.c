@@ -55,6 +55,9 @@
 #define IP_HEADER_SIZE	24
 #define TCP_HEADER_SIZE 26
 
+/* from https://elixir.bootlin.com/linux/v6.1.70/source/include/net/tcp.h#L65 */
+#define MAX_TCP_WINDOW      32767U
+
 /*
  * Data structure to fill with packet headers when we
  * get a new syn:
@@ -683,6 +686,10 @@ void *listener_loop(void UNUSED(*unused))
 		/* update ingress MSS if required */
 		if (ingress_mtu > 80) {
 				ingress_maxseg = ingress_mtu - IP_HEADER_SIZE - TCP_HEADER_SIZE;
+
+                if (ingress_maxseg > MAX_TCP_WINDOW) {
+                    ingress_maxseg = MAX_TCP_WINDOW;
+                }
 
 				ret = setsockopt(listenfd, IPPROTO_TCP, TCP_MAXSEG,
 								&ingress_maxseg, sizeof(ingress_maxseg));
